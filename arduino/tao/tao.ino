@@ -108,34 +108,47 @@ void selectChannel(int count){
       digitalWrite(A, LOW);
       digitalWrite(B, LOW);
       digitalWrite(C, LOW); 
+      break;
     case 1:
       digitalWrite(A, HIGH);
       digitalWrite(B, LOW);
       digitalWrite(C, LOW); 
+      break;
     case 2:
       digitalWrite(A, LOW);
       digitalWrite(B, HIGH);
       digitalWrite(C, LOW); 
+      break;
     case 3:
       digitalWrite(A, HIGH);
       digitalWrite(B, HIGH);
       digitalWrite(C, LOW); 
+      break;
     case 4:
       digitalWrite(A, LOW);
       digitalWrite(B, LOW);
       digitalWrite(C, HIGH); 
+      break;
     case 5:
       digitalWrite(A, HIGH);
       digitalWrite(B, LOW);
       digitalWrite(C, HIGH); 
+      break;
     case 6:
       digitalWrite(A, LOW);
       digitalWrite(B, HIGH);
       digitalWrite(C, HIGH); 
+      break;
     case 7:
       digitalWrite(A, HIGH);
       digitalWrite(B, HIGH);
       digitalWrite(C, HIGH); 
+      break;
+    default:
+      digitalWrite(A, LOW);
+      digitalWrite(B, LOW);
+      digitalWrite(C, LOW); 
+      break;
       
   }
   
