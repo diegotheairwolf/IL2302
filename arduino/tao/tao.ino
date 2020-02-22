@@ -40,6 +40,7 @@ unsigned long startTime;
 unsigned long elapsedTime;
 float microFarads;                // floating point variable to preserve precision, make calculations
 float nanoFarads;
+char  count = 0;
 
 void setup(){
   pinMode(chargePin13, OUTPUT);     // set charegePin13 to output
@@ -63,35 +64,26 @@ void setup(){
 }
 
 void loop(){
+  /* select channel */
+  selectChannel(count);
+
+  
+  /* charge the capacitor*/
   digitalWrite(chargePin13, HIGH);  // set charegePin13 HIGH and capacitor charging
   digitalWrite(chargePin12, HIGH);  // set charegePin13 HIGH and capacitor charging
-  startTime = millis();
   
-//  startTime = millis();
+  startTime = millis();
 
   while(analogRead(analogPin) < 648){       // 647 is 63.2% of 1023, which corresponds to full-scale voltage
   }
 
   elapsedTime= millis() - startTime;
- // convert milliseconds to seconds ( 10^-3 ) and Farads to microFarads ( 10^6 ),  net 10^3 (1000)  
-  microFarads = ((float)elapsedTime / resistorValue) * 1000.0;  
+ // convert milliseconds to seconds ( 10^-3 ) and Farads to microFarads ( 10^6 ),  net 10^3 (1000)
+  microFarads = ((float)elapsedTime / resistorValue) * 1000.0;
   Serial.print(elapsedTime);       // print the value to serial port
   Serial.print(" mS    ");         // print units and carriage return
-
-
-//  if (microFarads > 1){
-    Serial.print((float)microFarads,5);       // print the value to serial port
-    Serial.println(" microFarads");         // print units and carriage return
-//  }
-//  else
-//  {
-    // if value is smaller than one microFarad, convert to nanoFarads (10^-9 Farad).
-    // This is  a workaround because Serial.print will not print floats
-
-//    nanoFarads = microFarads * 1000.0;      // multiply by 1000 to convert to nanoFarads (10^-9 Farads)
-//    Serial.print((float)nanoFarads);         // print the value to serial port
-//    Serial.println(" nanoFarads");          // print units and carriage return
-//  }
+  Serial.print((float)microFarads,5);       // print the value to serial port
+  Serial.println(" microFarads");         // print units and carriage return
 
   /* dicharge the capacitor  */
   digitalWrite(chargePin13, LOW);             // set charge pin to  LOW
@@ -103,5 +95,48 @@ void loop(){
 
   pinMode(dischargePin11, INPUT);            // set discharge pin back to input
 
+
+  count++;
+  count = count%8;
+
   delay(100);
+}
+
+void selectChannel(int count){
+  switch(count){
+    case 0:
+      digitalWrite(A, LOW);
+      digitalWrite(B, LOW);
+      digitalWrite(C, LOW); 
+    case 1:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, LOW);
+      digitalWrite(C, LOW); 
+    case 2:
+      digitalWrite(A, LOW);
+      digitalWrite(B, HIGH);
+      digitalWrite(C, LOW); 
+    case 3:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, HIGH);
+      digitalWrite(C, LOW); 
+    case 4:
+      digitalWrite(A, LOW);
+      digitalWrite(B, LOW);
+      digitalWrite(C, HIGH); 
+    case 5:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, LOW);
+      digitalWrite(C, HIGH); 
+    case 6:
+      digitalWrite(A, LOW);
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH); 
+    case 7:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH); 
+      
+  }
+  
 }
