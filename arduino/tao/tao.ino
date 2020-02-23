@@ -18,16 +18,17 @@
  *  Wire between common point and analogPin (A/D input)
  */
 
-#define analogPin      0          // analog pin for measuring capacitor voltage
+//#define analogPin      0            // analog pin for measuring capacitor voltage
 #define chargePin13      13         // pin to charge the capacitor - connected to one end of the charging resistor
 #define dischargePin11   11         // pin to discharge the capacitor
 #define chargePin12      12         // pin to charge the capacitor - connected to one end of the charging resistor
 #define dischargePin10   10         // pin to discharge the capacitor
-#define A              4          // pin to select multiplexer channel. LSB
-#define B              3          // pin to select multiplexer channel.
-#define C              2          // pin to select multiplexer channel. MSB
+#define A              4            // pin to select multiplexer channel. LSB
+#define B              3            // pin to select multiplexer channel.
+#define C              2            // pin to select multiplexer channel. MSB
 #define resistorValue  1000000.0F   // change this to whatever resistor value you are using
-                                  // F formatter tells compliler it's a floating point value
+                                    // F formatter tells compliler it's a floating point value
+
 // defines for setting and clearing register bits
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
@@ -40,7 +41,8 @@ unsigned long startTime;
 unsigned long elapsedTime;
 float microFarads;                // floating point variable to preserve precision, make calculations
 float nanoFarads;
-char  count = 0;
+int  count = 0;
+int analogPin = 0;
 
 void setup(){
   pinMode(chargePin13, OUTPUT);     // set charegePin13 to output
@@ -65,12 +67,10 @@ void setup(){
 
 void loop(){
   /* select channel */
-  selectChannel(count);
-
+  selChannel(count);
   
   /* charge the capacitor*/
-  digitalWrite(chargePin13, HIGH);  // set charegePin13 HIGH and capacitor charging
-  digitalWrite(chargePin12, HIGH);  // set charegePin13 HIGH and capacitor charging
+  selChargePin(count);
   
   startTime = millis();
 
@@ -78,36 +78,62 @@ void loop(){
   }
 
   elapsedTime= millis() - startTime;
- // convert milliseconds to seconds ( 10^-3 ) and Farads to microFarads ( 10^6 ),  net 10^3 (1000)
+  
+  // convert milliseconds to seconds ( 10^-3 ) and Farads to microFarads ( 10^6 ),  net 10^3 (1000)
   microFarads = ((float)elapsedTime / resistorValue) * 1000.0;
-  Serial.print(elapsedTime);       // print the value to serial port
-  Serial.print(" mS    ");         // print units and carriage return
-  Serial.print((float)microFarads,5);       // print the value to serial port
+  Serial.print(" cap ");            // print the value to serial port
+  Serial.print(count);              // print the value to serial port
+  Serial.print(" ");          // print units and carriage return
+  Serial.print(elapsedTime);        // print the value to serial port
+  Serial.print(" mS    ");          // print units and carriage return
+  Serial.print((float)microFarads,5);     // print the value to serial port
   Serial.println(" microFarads");         // print units and carriage return
 
+  
   /* dicharge the capacitor  */
   digitalWrite(chargePin13, LOW);             // set charge pin to  LOW
   digitalWrite(chargePin12, LOW);             // set charge pin to  LOW
+  
   pinMode(dischargePin11, OUTPUT);            // set discharge pin to output
+  pinMode(dischargePin10, OUTPUT);            // set discharge pin to output
+  
   digitalWrite(dischargePin11, LOW);          // set discharge pin LOW
+  digitalWrite(dischargePin10, LOW);          // set discharge pin LOW
+  
   while(analogRead(analogPin) > 0){         // wait until capacitor is completely discharged
   }
 
   pinMode(dischargePin11, INPUT);            // set discharge pin back to input
+  pinMode(dischargePin10, INPUT);            // set discharge pin back to input
 
 
   count++;
-  count = count%8;
+  count = count%5;
 
   delay(100);
 }
 
-void selectChannel(int count){
+void selChargePin(int count){
+  if(count==4){
+      digitalWrite(chargePin13, LOW);   // set charegePin13 HIGH and capacitor charging
+      digitalWrite(chargePin12, HIGH);  // set charegePin12 HIGH and capacitor charging
+      analogPin = 1;
+  }
+  else {
+      digitalWrite(chargePin13, HIGH);  // set charegePin13 HIGH and capacitor charging
+      digitalWrite(chargePin12, LOW);   // set charegePin12 HIGH and capacitor charging
+      analogPin = 0;
+  }
+  
+  
+}
+
+void selChannel(int count){
   switch(count){
     case 0:
       digitalWrite(A, LOW);
       digitalWrite(B, LOW);
-      digitalWrite(C, LOW); 
+      digitalWrite(C, LOW);
       break;
     case 1:
       digitalWrite(A, HIGH);
