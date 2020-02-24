@@ -55,7 +55,7 @@ float average = 0;                // the average
 void setup(){
   pinMode(chargePin13, OUTPUT);     // set charegePin13 to output
   digitalWrite(chargePin13, LOW);
-  pinMode(chargePin12, OUTPUT);     // set charegePin13 to output
+  pinMode(chargePin12, OUTPUT);     // set charegePin12 to output
   digitalWrite(chargePin12, LOW);   
 
   pinMode(A, OUTPUT);     // pin to select multiplexer channel. LSB
@@ -108,10 +108,10 @@ void loop(){
 
   // calculate the average:
   average = total[count] / numReadings;
+  
 
-  Serial.print("count   ");
   Serial.print(count);
-  Serial.print("   ");
+  Serial.print(" ");
   Serial.println((float)average,5);
 
 
@@ -153,17 +153,20 @@ void loop(){
     if (readIndex >= numReadings) {
     // ...wrap around to the beginning:
     readIndex = 0;
+
+//    Serial.println((float)average,5);
+    
     }
   }
 
-  delay(100);
+  delay(250);
 }
 
 void selChargePin(int count){
   if(count==1){
       digitalWrite(chargePin13, LOW);   // set charegePin13 LOW and capacitor charging
       digitalWrite(chargePin12, HIGH);  // set charegePin12 HIGH and capacitor charging
-      analogPin = 1;
+      analogPin = 0;
   }
   else {
       digitalWrite(chargePin13, HIGH);  // set charegePin13 HIGH and capacitor charging
