@@ -71,7 +71,7 @@ void loop(){
   microFarads = ((float)elapsedTime / resistorValue) * 1000000.0;
 
 
-  // subtract the last reading:
+    // subtract the last reading:
     total = total - readings[readIndex];
     // read from the sensor:
     readings[readIndex] = microFarads;

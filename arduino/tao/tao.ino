@@ -7,7 +7,7 @@
  *
  *    TC = time constant period in seconds
  *    R = resistance in ohms
- *    C = capacitance in farads (1 microfarad (ufd) = .0000001 farad = 10^-6 farads )
+ *    C = capacitance in farads (1 picofarad (ufd) = .0000001 farad = 10^-6 farads )
  *
  *    The capacitor's voltage at one time constant is defined as 63.2% of the charging voltage.
  *
@@ -39,10 +39,18 @@
 
 float startTime;
 float elapsedTime;
-float microFarads;                // floating point variable to preserve precision, make calculations
+float picoFarads;                // floating point variable to preserve precision, make calculations
 float nanoFarads;
 int  count = 0;
 int analogPin = 0;
+int const numCaps = 9;
+
+////////////////////////////////////////////////////////
+int const numReadings = 30;
+float readings[numCaps][numReadings];
+int readIndex = 0;              // the index of the current reading
+float total[numCaps] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };                  // the running total
+float average = 0;                // the average
 
 void setup(){
   pinMode(chargePin13, OUTPUT);     // set charegePin13 to output
@@ -58,6 +66,13 @@ void setup(){
   digitalWrite(C, LOW);
   
   Serial.begin(9600);             // initialize serial transmission for debugging
+
+  // initialize moving average matrix
+  for (int thisReading = 0; thisReading < numReadings; thisReading++) {
+    for(int i = 0; i<9; i++){
+      readings[i][thisReading] = 0;
+     }
+  }
 
   // set prescale to 16
   sbi(ADCSRA, ADPS2);
@@ -80,14 +95,34 @@ void loop(){
   elapsedTime= micros() - startTime;
   
   // convert microseconds to seconds ( 10^-6 ) and Farads to picoFarads ( 10^12 ),  net 10^6 (1000000)
-  microFarads = ((float)elapsedTime / resistorValue) * 1000000.0;
-  Serial.print(" cap ");            // print the value to serial port
-  Serial.print(count);              // print the value to serial port
-  Serial.print(" ");          // print units and carriage return
-  Serial.print(elapsedTime);        // print the value to serial port
-  Serial.print(" mS    ");          // print units and carriage return
-  Serial.print((float)microFarads,5);     // print the value to serial port
-  Serial.println(" picoFarads");         // print units and carriage return
+  picoFarads = ((float)elapsedTime / resistorValue) * 1000000.0;
+
+
+  // subtract the last reading:
+  total[count] = total[count] - readings[count][readIndex];
+  // read from the sensor:
+  readings[count][readIndex] = picoFarads;
+  // add the reading to the total:
+  total[count] = total[count] + readings[count][readIndex];
+  
+
+  // calculate the average:
+  average = total[count] / numReadings;
+
+  Serial.print("count   ");
+  Serial.print(count);
+  Serial.print("   ");
+  Serial.println((float)average,5);
+
+
+
+//  Serial.print(" cap ");            // print the value to serial port
+//  Serial.print(count);              // print the value to serial port
+//  Serial.print(" ");          // print units and carriage return
+//  Serial.print(elapsedTime);        // print the value to serial port
+//  Serial.print(" mS    ");          // print units and carriage return
+//  Serial.print((float)picoFarads,5);     // print the value to serial port
+//  Serial.println(" picoFarads");         // print units and carriage return
 
   
   /* dicharge the capacitor  */
@@ -108,7 +143,18 @@ void loop(){
 
 
   count++;
-  count = count%1;
+  
+  if(count == 2){
+    count = 0;
+    // advance to the next position in the array:
+    readIndex = readIndex + 1;
+
+    // if we're at the end of the array...
+    if (readIndex >= numReadings) {
+    // ...wrap around to the beginning:
+    readIndex = 0;
+    }
+  }
 
   delay(100);
 }
