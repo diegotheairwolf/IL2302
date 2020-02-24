@@ -26,7 +26,7 @@
 #define A              4            // pin to select multiplexer channel. LSB
 #define B              3            // pin to select multiplexer channel.
 #define C              2            // pin to select multiplexer channel. MSB
-#define resistorValue  1000000.0F   // change this to whatever resistor value you are using
+#define resistorValue  3300000.0F   // change this to whatever resistor value you are using
                                     // F formatter tells compliler it's a floating point value
 
 // defines for setting and clearing register bits
@@ -108,9 +108,9 @@ void loop(){
 
 
   count++;
-  count = count%2;
+  count = count%1;
 
-  delay(500);
+  delay(100);
 }
 
 void selChargePin(int count){
