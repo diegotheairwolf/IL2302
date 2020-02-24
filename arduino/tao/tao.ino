@@ -37,8 +37,8 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
-unsigned long startTime;
-unsigned long elapsedTime;
+float startTime;
+float elapsedTime;
 float microFarads;                // floating point variable to preserve precision, make calculations
 float nanoFarads;
 int  count = 0;
@@ -72,22 +72,22 @@ void loop(){
   /* charge the capacitor*/
   selChargePin(count);
   
-  startTime = millis();
+  startTime = micros();
 
   while(analogRead(analogPin) < 648){       // 647 is 63.2% of 1023, which corresponds to full-scale voltage
   }
 
-  elapsedTime= millis() - startTime;
+  elapsedTime= micros() - startTime;
   
-  // convert milliseconds to seconds ( 10^-3 ) and Farads to microFarads ( 10^6 ),  net 10^3 (1000)
-  microFarads = ((float)elapsedTime / resistorValue) * 1000.0;
+  // convert microseconds to seconds ( 10^-6 ) and Farads to picoFarads ( 10^12 ),  net 10^6 (1000000)
+  microFarads = ((float)elapsedTime / resistorValue) * 1000000.0;
   Serial.print(" cap ");            // print the value to serial port
   Serial.print(count);              // print the value to serial port
   Serial.print(" ");          // print units and carriage return
   Serial.print(elapsedTime);        // print the value to serial port
   Serial.print(" mS    ");          // print units and carriage return
   Serial.print((float)microFarads,5);     // print the value to serial port
-  Serial.println(" microFarads");         // print units and carriage return
+  Serial.println(" picoFarads");         // print units and carriage return
 
   
   /* dicharge the capacitor  */
@@ -108,20 +108,20 @@ void loop(){
 
 
   count++;
-  count = count%5;
+  count = count%2;
 
-  delay(100);
+  delay(500);
 }
 
 void selChargePin(int count){
-  if(count==4){
-      digitalWrite(chargePin13, LOW);   // set charegePin13 HIGH and capacitor charging
+  if(count==1){
+      digitalWrite(chargePin13, LOW);   // set charegePin13 LOW and capacitor charging
       digitalWrite(chargePin12, HIGH);  // set charegePin12 HIGH and capacitor charging
       analogPin = 1;
   }
   else {
       digitalWrite(chargePin13, HIGH);  // set charegePin13 HIGH and capacitor charging
-      digitalWrite(chargePin12, LOW);   // set charegePin12 HIGH and capacitor charging
+      digitalWrite(chargePin12, LOW);   // set charegePin12 LOW and capacitor charging
       analogPin = 0;
   }
   
