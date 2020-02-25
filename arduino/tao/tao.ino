@@ -23,9 +23,9 @@
 #define dischargePin11   11         // pin to discharge the capacitor
 #define chargePin12      12         // pin to charge the capacitor - connected to one end of the charging resistor
 #define dischargePin10   10         // pin to discharge the capacitor
-#define A              4            // pin to select multiplexer channel. LSB
+#define A              2            // pin to select multiplexer channel. LSB
 #define B              3            // pin to select multiplexer channel.
-#define C              2            // pin to select multiplexer channel. MSB
+#define C              4            // pin to select multiplexer channel. MSB
 #define resistorValue  3300000.0F   // change this to whatever resistor value you are using
                                     // F formatter tells compliler it's a floating point value
 
@@ -44,6 +44,7 @@ float nanoFarads;
 int  count = 0;
 int analogPin = 0;
 int const numCaps = 9;
+int const numTestCaps = 4;
 
 ////////////////////////////////////////////////////////
 int const numReadings = 30;
@@ -86,7 +87,7 @@ void loop(){
   
   /* charge the capacitor*/
   selChargePin(count);
-  
+
   startTime = micros();
 
   while(analogRead(analogPin) < 648){       // 647 is 63.2% of 1023, which corresponds to full-scale voltage
@@ -105,7 +106,6 @@ void loop(){
   // add the reading to the total:
   total[count] = total[count] + readings[count][readIndex];
   
-
   // calculate the average:
   average[count] = total[count] / numReadings;
   
@@ -144,13 +144,13 @@ void loop(){
 
   count++;
   
-  if(count == 2){
+  if(count == numTestCaps){
     count = 0;
     // advance to the next position in the array:
     readIndex = readIndex + 1;
 
     // print only after all caps have been collected
-    for (int i = 0; i<2; i++){
+    for (int i = 0; i<numTestCaps; i++){
       Serial.print(i);
       Serial.print(" ");
       Serial.println((float)average[i],5);
@@ -171,14 +171,14 @@ void loop(){
     }
   }
 
-  delay(10);
+//  delay(10);
 }
 
 void selChargePin(int count){
-  if(count==1){
+  if(count==8){
       digitalWrite(chargePin13, LOW);   // set charegePin13 LOW and capacitor charging
       digitalWrite(chargePin12, HIGH);  // set charegePin12 HIGH and capacitor charging
-      analogPin = 0;
+      analogPin = 1;
   }
   else {
       digitalWrite(chargePin13, HIGH);  // set charegePin13 HIGH and capacitor charging
