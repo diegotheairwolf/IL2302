@@ -49,8 +49,8 @@ int const numCaps = 9;
 int const numReadings = 30;
 float readings[numCaps][numReadings];
 int readIndex = 0;              // the index of the current reading
-float total[numCaps] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };                  // the running total
-float average = 0;                // the average
+float total[numCaps] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };    // the running total
+float average[numCaps] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };           // the average
 
 void setup(){
   pinMode(chargePin13, OUTPUT);     // set charegePin13 to output
@@ -107,12 +107,12 @@ void loop(){
   
 
   // calculate the average:
-  average = total[count] / numReadings;
+  average[count] = total[count] / numReadings;
   
 
-  Serial.print(count);
-  Serial.print(" ");
-  Serial.println((float)average,5);
+//  Serial.print(count);
+//  Serial.print(" ");
+//  Serial.println((float)average[count],5);
 
 
 
@@ -149,17 +149,29 @@ void loop(){
     // advance to the next position in the array:
     readIndex = readIndex + 1;
 
+    // print only after all caps have been collected
+    for (int i = 0; i<2; i++){
+      Serial.print(i);
+      Serial.print(" ");
+      Serial.println((float)average[i],5);
+    }
+
     // if we're at the end of the array...
     if (readIndex >= numReadings) {
     // ...wrap around to the beginning:
     readIndex = 0;
 
-//    Serial.println((float)average,5);
+//    // print only after numReadings have been collected
+//    for (int i = 0; i<2; i++){
+//      Serial.print(i);
+//      Serial.print(" ");
+//      Serial.println((float)average[i],5);
+//    }
     
     }
   }
 
-  delay(250);
+  delay(10);
 }
 
 void selChargePin(int count){
