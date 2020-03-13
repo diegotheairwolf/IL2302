@@ -15,7 +15,7 @@ class Data_Handling():
                 output_file_path   : Output file active (value is path) or not (False)
                 printing_type      : Which data to printing in file (0-8 indicates which tile, -1 all of them)
         """
-        self.original_look_up={0:[296,317,355,381,390], 1:[357,395,444,464,480], 2:[366,406,432,446,456], 3:[299,355,380,405,430], 4:[350,420,442,461,476], 5:[380,413,455,470,481], 6:[317,356,384,390,480], 7:[650,810,820,845,880], 8:[330,367,387,418,431]}
+        self.original_look_up={0:[296,340,355,363,390], 1:[343,380,405,422,428], 2:[350,378,410,415,420], 3:[329,372,394,413,430], 4:[352,394,410,420,446], 5:[353,389,425,430,440], 6:[317,360,381,380,407], 7:[770,930,950,1000,1025], 8:[293,333,362,377,400]}
         self.look_up={}
         self.GUI=GUI                                        
         self.printing_type=printing_type
@@ -28,6 +28,8 @@ class Data_Handling():
         f=open(self.output_file, "w")
         f.write("Time:"+str(datetime.now().time())+"\n")
         f.close()
+
+        self.iteration_count=0
 
  
     def init_look_up(self):
@@ -53,24 +55,31 @@ class Data_Handling():
             self.look_up[data]=temp
         return
 
+    def button_toggle_data_printing(self):
+        if not self.data_printing_active:
+            self.toggle_data_printing()
+        else:
+            print(self.iteration_count)
     def toggle_data_printing(self):
         if self.data_printing_active:
             self.data_printing_active=False
             if self.GUI:
-                self.register_button.configure(bg='red')
+                self.register_button.configure(bg='green')
             f=open(DH.output_file, "a+")
             f.write("\n")
             f.close()
+            DH.iteration_count=0
         else:
             self.data_printing_active=True
             if self.GUI:
-                self.register_button.configure(bg='green')
+                self.register_button.configure(bg='red')
             f=open(DH.output_file, "a+")
             f.write("\n")
             f.close()
 
 
 DH=Data_Handling(GUI=True, output_file_path="..\..\output.txt", printing_type=0)
+NUMBER_OF_DATA=10000
 
 #port = '/dev/tty.usbmodemFA131'
 port = 'COM3'
@@ -97,7 +106,7 @@ if DH.GUI:
         text_box[-1].grid(row=i//3, column=i%3)
     tk.Button(w,text="Calibrate",command=DH.calibrate).grid(row=3,column=1)
     if DH.output_file:
-        DH.register_button=tk.Button(w,text="Register data",command=DH.toggle_data_printing, bg='red')
+        DH.register_button=tk.Button(w,text="Register data",command=DH.button_toggle_data_printing, bg='green')
         DH.register_button.grid(row=3,column=2)
     w.update()
 
@@ -126,8 +135,9 @@ while True:
             text="err"
 
         if DH.GUI:
-            text_var[data].set(text)
             #text=datas[data]
+            text_var[data].set(text)
+            
         else:
             print(text,end=" ")
             if data==2 or data==5:
@@ -147,5 +157,10 @@ while True:
         else:
             f.write(str(datas[DH.printing_type])+"\t")
         f.close()
+        DH.iteration_count+=1
+        if DH.iteration_count>=NUMBER_OF_DATA:
+            DH.toggle_data_printing()
+        
+            
 
 ser.close()             # close port
